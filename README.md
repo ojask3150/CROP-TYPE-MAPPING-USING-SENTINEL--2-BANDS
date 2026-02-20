@@ -1,5 +1,5 @@
 # CROP-TYPE SEGMENTATION USING SENTINEL-2 BANDS
-## Pixel-Level Classification of Wheat and Mustard in Haryana
+## Pixel-Level Classification of Wheat and Mustard in U.P
 
 A two-stage deep learning pipeline to classify wheat and mustard at 10m resolution using Sentinel-2 satellite imagery, tackling extreme class imbalance where crop pixels are <0.1% of the data.
 
@@ -8,9 +8,9 @@ A two-stage deep learning pipeline to classify wheat and mustard at 10m resoluti
 
 This project implements a two-stage segmentation architecture to identify wheat and mustard crops at pixel level from early-season Sentinel-2 data. The core challenge: 99.9% of pixels are background, causing standard models to fail by predicting "background" everywhere.
 
-**Study Area**: Haryana, India (Tile T43RFN)  
+**Study Area**: U.P, India (Tile T44RPP)  
 **Resolution**: 10m (10980 × 10980 pixels per tile)  
-**Crops**: Wheat (Rabi), Mustard (Rabi)
+**Crops**: Wheat , Mustard 
 
 
 ## Dataset
@@ -40,27 +40,30 @@ This project implements a two-stage segmentation architecture to identify wheat 
 ## Architecture
 
 ### Two-Stage Pipeline
-Raw Tile (256×256×4)
-↓
-┌─────────────────┐
-│ Stage 1: │
-│ Crop Detector │
-│ (Binary CNN) │
-└────────┬────────┘
-↓
-┌──────┴──────┐
-↓ No crops ↓ Has crops
-↓ ↓
-Empty ┌─────────────┐
-Tile │ Stage 2: │
-(all zero) │ U-Net │
-│ Segmentor │
-└──────┬──────┘
-↓
-┌──────────────────┐
-│ Wheat | Mustard │
-│ Mask │
-└──────────────────┘
+        Raw Tile (256×256×4)
+                ↓
+        ┌───────────────┐
+        │ Stage 1:      │
+        │ Crop Detector │
+        └───────┬───────┘
+                ↓
+        ┌───────┴───────┐
+        │               │
+   ═════╣               ╠═════
+   ↑    │               │     ↑
+   │ No crops     Has crops │
+   ↓    │               │     ↓
+Empty   │               │   ┌───────────┐
+Tile    │               │   │ Stage 2:  │
+(all 0) │               │   │   U-Net   │
+        │               │   └─────┬─────┘
+        │               │         ↓
+        │               │   ┌───────────┐
+        │               │   │   Wheat/  │
+        │               │   │  Mustard  │
+        │               │   │   Mask    │
+        │               │   └───────────┘
+        └───────────────┘
 
 ### Stage 1: Crop Detector CNN
 Input (256×256×4)
