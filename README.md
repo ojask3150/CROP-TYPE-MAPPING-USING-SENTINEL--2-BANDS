@@ -65,42 +65,21 @@ Dense(1, sigmoid)
 
 [0 = empty | 1 = crop present]
 
+Loss Function:- BCE (Binary Cross Entropy) Loss : -[y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred)]
+
 ### Stage 2: U-Net Segmentor
 
-┌──────────────────────────────────────────────────────┐
-│                   U-NET ARCHITECTURE                  │
-├───────────── ENCODER ───────────┬───── DECODER ───────┤
-│                                  │                     │
-│  Input: 256×256×4                │                     │
-│         ↓                        │                     │
-│  [Conv 3×3, 32] ×2 ──────────────┼────> [Conv 3×3, 32] │
-│         ↓                        │           ↑         │
-│      MaxPool (2)                  │           │         │
-│         ↓                        │      Concatenate     │
-│  [Conv 3×3, 64] ×2 ──────────────┼────> [Conv 3×3, 64] │
-│         ↓                        │           ↑         │
-│      MaxPool (2)                  │           │         │
-│         ↓                        │      Concatenate     │
-│  [Conv 3×3, 128] ×2 ─────────────┼────> [Conv 3×3, 128]│
-│         ↓                        │           ↑         │
-│      MaxPool (2)                  │           │         │
-│         ↓                        │      Upsample (2)    │
-│  [Conv 3×3, 256] ×2               │           ↑         │
-│         ↓                        │      Concatenate     │
-│      Bottleneck ──────────────────┼────> [Conv 3×3, 128]│
-│                                  │           ↑         │
-│                                  │      Upsample (2)    │
-│                                  │           ↑         │
-│                                  │  [Conv 3×3, 64] ×2   │
-│                                  │           ↑         │
-│                                  │      Upsample (2)    │
-│                                  │           ↑         │
-│                                  │  [Conv 3×3, 32] ×2   │
-│                                  │           ↑         │
-│                                  │  [Conv 1×1, 3]       │
-│                                  │           ↑         │
-│                                  │  Output: 256×256×3   │
-└──────────────────────────────────────────────────────┘
+Encoder :- (256X256X4 -> 32X32X256) (4 BANDS x (65536 PIXELS PER TILE)
+
+Decoder:- (32X32X256 -> 256X256X3) (3 CLASSES x (65536 PIXELS PER TILE)
+
+Loss Function:- SCCE (Sparse Categorical Cross-Entropy) Loss:
+  For a single pixel:
+  Loss = -log(y_pred[true_class])
+  
+  Where:
+  - true_class = 0 (background), 1 (wheat), or 2 (mustard)
+  - y_pred = [p(bg), p(wheat), p(mustard)]
 
 
 ## Key Techniques
