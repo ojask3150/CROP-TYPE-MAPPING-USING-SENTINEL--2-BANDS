@@ -13,6 +13,8 @@ This project implements a two-stage segmentation architecture to identify wheat 
 **Crops**: Wheat , Mustard 
 
 
+
+
 ## Dataset
 
 ### Satellite Data
@@ -35,6 +37,8 @@ This project implements a two-stage segmentation architecture to identify wheat 
 | 12_38 | 0 | 0 | 65,536 | Empty |
 
 **The Imbalance**: Crop pixels = 0.1% of total data | Background = 99.9%
+
+
 
 
 ## Architecture (Two-Stage Pipeline)
@@ -65,13 +69,20 @@ Dense(1, sigmoid)
 
 [0 = empty | 1 = crop present]
 
+
+
 Loss Function:- BCE (Binary Cross Entropy) Loss : -[y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred)]
+
 
 ### Stage 2: U-Net Segmentor
 
 Encoder :- (256X256X4 -> 32X32X256) (4 BANDS x (65536 PIXELS PER TILE)
 
+
+
 Decoder:- (32X32X256 -> 256X256X3) (3 CLASSES x (65536 PIXELS PER TILE)
+
+
 
 Loss Function:- SCCE (Sparse Categorical Cross-Entropy) Loss:
   For a single pixel:
@@ -80,6 +91,8 @@ Loss Function:- SCCE (Sparse Categorical Cross-Entropy) Loss:
   Where:
   - true_class = 0 (background), 1 (wheat), or 2 (mustard)
   - y_pred = [p(bg), p(wheat), p(mustard)]
+
+
 
 
 ## Key Techniques
@@ -98,7 +111,9 @@ Loss Function:- SCCE (Sparse Categorical Cross-Entropy) Loss:
           x1 = max(0, cx - patch_size//2)
           patches.append(image[y1:y1+patch_size, x1:x1+patch_size])
       return np.array(patches)
-  ```
+```
+
+
 ### 2. Class Weighting:-
   # Force model to care about rare classes
   class_weights = {
@@ -106,8 +121,16 @@ Loss Function:- SCCE (Sparse Categorical Cross-Entropy) Loss:
       1: 10.0,   # Wheat (10× importance)
       2: 20.0    # Mustard (20× importance)
   }
+
+
+
+  
 ## Results
+
+
 SEGMENTATION METRICS - ALL 8 TILES
+
+
 ====================================================================================================
 Tile                 Class            TP       FP       FN       TN      IoU     Dice     Prec   Recall       F1      Acc
 ------------------------------------------------------------------------------------------------------------------------
@@ -160,6 +183,9 @@ Wheat - IoU: 0.5804, Dice: 0.7345, F1: 0.7345
 Mustard - IoU: 0.5326, Dice: 0.6950, F1: 0.6950
 Mean IoU: 0.7018
 
+
+
+
 ## Key Findings
   ### 1. The Imbalance Problem is Solved
   
@@ -179,6 +205,8 @@ Mean IoU: 0.7018
   Crop tile: Only 491 false positives (0.7% of background)
 
 
+
+  
 ## Interpretation
 The model successfully identifies where crops are and which crop type with high confidence. The remaining errors stem from:
 
@@ -189,6 +217,8 @@ The model successfully identifies where crops are and which crop type with high 
 3. Limited training examples for mustard (218 pixels only)
 
 With more diverse training tiles, performance would improve further.
+
+
 
 
 ## Tech Stack
