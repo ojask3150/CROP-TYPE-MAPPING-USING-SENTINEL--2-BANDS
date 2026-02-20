@@ -85,11 +85,14 @@ Decoder:- (32X32X256 -> 256X256X3) (3 CLASSES x (65536 PIXELS PER TILE)
 
 
 Loss Function:- SCCE (Sparse Categorical Cross-Entropy) Loss:
+
   For a single pixel:
+  
   Loss = -log(y_pred[true_class])
   
   Where:
   - true_class = 0 (background), 1 (wheat), or 2 (mustard)
+    
   - y_pred = [p(bg), p(wheat), p(mustard)]
 
 
@@ -131,14 +134,20 @@ Loss Function:- SCCE (Sparse Categorical Cross-Entropy) Loss:
 ### SUMMARY STATISTICS
 
 Average Wheat IoU: 0.0751 ± 0.1911
+
 Average Mustard IoU: 0.0666 ± 0.1761
+
 Average Background IoU: 0.9968 ± 0.0019
+
 Average Mean IoU: 0.3795 ± 0.1218
+
 
 ### CROP TILE ONLY (rasterlayer_11_37.tif)
 
 Wheat - IoU: 0.5804, Dice: 0.7345, F1: 0.7345
+
 Mustard - IoU: 0.5326, Dice: 0.6950, F1: 0.6950
+
 Mean IoU: 0.7018
 
 
