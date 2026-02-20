@@ -37,60 +37,70 @@ This project implements a two-stage segmentation architecture to identify wheat 
 **The Imbalance**: Crop pixels = 0.1% of total data | Background = 99.9%
 
 
-## Architecture
-
-### Two-Stage Pipeline
-        Raw Tile (256×256×4)
-                ↓
-        ┌───────────────┐
-        │ Stage 1:      │
-        │ Crop Detector │
-        └───────┬───────┘
-                ↓
-        ┌───────┴───────┐
-        │               │
-   ═════╣               ╠═════
-   ↑    │               │     ↑
-   │ No crops     Has crops │
-   ↓    │               │     ↓
-Empty   │               │   ┌───────────┐
-Tile    │               │   │ Stage 2:  │
-(all 0) │               │   │   U-Net   │
-        │               │   └─────┬─────┘
-        │               │         ↓
-        │               │   ┌───────────┐
-        │               │   │   Wheat/  │
-        │               │   │  Mustard  │
-        │               │   │   Mask    │
-        │               │   └───────────┘
-        └───────────────┘
+## Architecture (Two-Stage Pipeline)
 
 ### Stage 1: Crop Detector CNN
 Input (256×256×4)
 ↓
-Conv2D(32,3) → BatchNorm → MaxPool(2)
+
+Conv2D(32,3)  →  BatchNorm  →  MaxPool(2)
+
 ↓
-Conv2D(64,3) → BatchNorm → MaxPool(2)
+
+Conv2D(64,3)  →  BatchNorm  →  MaxPool(2)
+
 ↓
-Conv2D(128,3) → BatchNorm
+
+Conv2D(128,3)  →  BatchNorm
+
 ↓
-GlobalAvgPool → Dense(64) → Dropout(0.3)
+
+GlobalAvgPool  →  Dense(64)  →  Dropout(0.3)
+
 ↓
+
 Dense(1, sigmoid)
+
 ↓
+
 [0 = empty | 1 = crop present]
 
 ### Stage 2: U-Net Segmentor
-Encoder Decoder
-256×256×4 256×256×3
-↓ ↑
-├── Conv(32) ── Skip ───────────┤
-↓ ↑
-├── Conv(64) ── Skip ───────────┤
-↓ ↑
-├── Conv(128) ─ Skip ───────────┤
-↓ ↑
-└── Conv(256) ─ Bottleneck ─────┘
+
+┌──────────────────────────────────────────────────────┐
+│                   U-NET ARCHITECTURE                  │
+├───────────── ENCODER ───────────┬───── DECODER ───────┤
+│                                  │                     │
+│  Input: 256×256×4                │                     │
+│         ↓                        │                     │
+│  [Conv 3×3, 32] ×2 ──────────────┼────> [Conv 3×3, 32] │
+│         ↓                        │           ↑         │
+│      MaxPool (2)                  │           │         │
+│         ↓                        │      Concatenate     │
+│  [Conv 3×3, 64] ×2 ──────────────┼────> [Conv 3×3, 64] │
+│         ↓                        │           ↑         │
+│      MaxPool (2)                  │           │         │
+│         ↓                        │      Concatenate     │
+│  [Conv 3×3, 128] ×2 ─────────────┼────> [Conv 3×3, 128]│
+│         ↓                        │           ↑         │
+│      MaxPool (2)                  │           │         │
+│         ↓                        │      Upsample (2)    │
+│  [Conv 3×3, 256] ×2               │           ↑         │
+│         ↓                        │      Concatenate     │
+│      Bottleneck ──────────────────┼────> [Conv 3×3, 128]│
+│                                  │           ↑         │
+│                                  │      Upsample (2)    │
+│                                  │           ↑         │
+│                                  │  [Conv 3×3, 64] ×2   │
+│                                  │           ↑         │
+│                                  │      Upsample (2)    │
+│                                  │           ↑         │
+│                                  │  [Conv 3×3, 32] ×2   │
+│                                  │           ↑         │
+│                                  │  [Conv 1×1, 3]       │
+│                                  │           ↑         │
+│                                  │  Output: 256×256×3   │
+└──────────────────────────────────────────────────────┘
 
 
 ## Key Techniques
